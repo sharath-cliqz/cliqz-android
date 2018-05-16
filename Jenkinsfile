@@ -72,8 +72,6 @@ node('us-east-1 && ubuntu && docker && !gpu') {
                         "APP=${apk}",
                         "platformName=android",
                         "deviceName=127.0.0.1:5556",
-                        "MODULE=testSmoke",
-                        "TEST=SmokeTest",
                         "appPackage=com.cliqz.browser.alpha",
                         "appActivity=org.mozilla.gecko.LauncherActivity"
                         ]) {
