@@ -3,7 +3,6 @@ package org.mozilla.gecko.home;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -27,12 +26,9 @@ import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.mozilla.gecko.BrowserLocaleManager;
-import org.mozilla.gecko.GeckoSharedPrefs;
-import org.mozilla.gecko.LocaleManager;
 import org.mozilla.gecko.R;
 import org.mozilla.gecko.myoffrz.MyOffrzLoader;
-import org.mozilla.gecko.preferences.GeckoPreferences;
+import org.mozilla.gecko.preferences.PreferenceManager;
 import org.mozilla.gecko.util.StringUtils;
 
 import java.util.EnumSet;
@@ -83,6 +79,8 @@ public class MyOffrzPanel extends HomeFragment {
     Button learnMoreOnBoarding, activate;
     ImageButton closeOnBoarding;
 
+    PreferenceManager mPreferenceManager;
+
     private static void trace(final String message) {
         if (logVerbose) {
             Log.v(LOGTAG, message);
@@ -114,6 +112,8 @@ public class MyOffrzPanel extends HomeFragment {
         onboardingText.setText(R.string.myoffrz_onboarding_description);
         activationText.setText(R.string.myoffrz_activation_description);
 
+        mPreferenceManager = new PreferenceManager(getContext());
+
         learnMoreOnBoarding.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -141,8 +141,8 @@ public class MyOffrzPanel extends HomeFragment {
         activate.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                setMyOffrzEnabled(true);
-                setMyOffrzOnboardingEnabled(false);
+                mPreferenceManager.setMyOffrzEnabled(true);
+                mPreferenceManager.setMyOffrzOnboardingEnabled(false);
                 activationVG.setVisibility(View.GONE);
                 myOffrzDeactivateView.setVisibility(View.INVISIBLE);
                 enableClickActionsOnOffrz(true);
@@ -158,15 +158,21 @@ public class MyOffrzPanel extends HomeFragment {
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        if (!isMyOffrzEnable()) {
+    public void onResume() {
+        super.onResume();
+        if (!mPreferenceManager.isMyOffrzEnable()) {
             activationVG.setVisibility(View.VISIBLE);
+            onboardingVG.setVisibility(View.GONE);
             myOffrzDeactivateView.setVisibility(View.VISIBLE);
             myOffrzDeactivateView.bringToFront();
             enableClickActionsOnOffrz(false);
-        } else if (isMyOffrzOnboardingEnabled()) {
-            onboardingVG.setVisibility(View.VISIBLE);
+        }else{
+            activationVG.setVisibility(View.GONE);
+            myOffrzDeactivateView.setVisibility(View.GONE);
+            enableClickActionsOnOffrz(true);
+            if (mPreferenceManager.isMyOffrzOnboardingEnabled()) {
+                onboardingVG.setVisibility(View.VISIBLE);
+            }
         }
     }
 
@@ -189,7 +195,7 @@ public class MyOffrzPanel extends HomeFragment {
 
     private void closeOnboarding() {
         onboardingVG.setVisibility(View.GONE);
-        setMyOffrzOnboardingEnabled(false);
+        mPreferenceManager.setMyOffrzOnboardingEnabled(false);
     }
 
 
@@ -199,7 +205,7 @@ public class MyOffrzPanel extends HomeFragment {
         @Override
         public Loader<JSONObject> onCreateLoader(int id, Bundle args) {
             trace("Creating TopSitesLoader: " + id);
-            return new MyOffrzLoader(getActivity());
+            return new MyOffrzLoader(getContext());
         }
 
         @Override
@@ -275,7 +281,7 @@ public class MyOffrzPanel extends HomeFragment {
             }
 
             offersContainer.addView(offer);
-            if(!isMyOffrzEnable()) {
+            if(!mPreferenceManager.isMyOffrzEnable()) {
                 myOffrzDeactivateView.setVisibility(View.VISIBLE);
                 myOffrzDeactivateView.bringToFront();
                 holder.enableClickActions(false);
@@ -389,41 +395,4 @@ public class MyOffrzPanel extends HomeFragment {
             copyCode.setClickable(enable);
         }
     }
-
-    /* Cliqz start */
-    // add get and set function for MyOffrz OnBoarding pref.
-    // This part is derived from @{@link TabQueuePanel}.java
-    public void setMyOffrzOnboardingEnabled(boolean value) {
-        final SharedPreferences prefs = GeckoSharedPrefs.forApp(getActivity());
-        final SharedPreferences.Editor editor = prefs.edit();
-        editor.putBoolean(GeckoPreferences.IS_MYOFFRZ_ONBOARDING_ENABLED, value).apply();
-    }
-    
-    // This part is derived from @{@link TabQueueHelper}.java
-    public boolean isMyOffrzOnboardingEnabled() {
-        final SharedPreferences prefs = GeckoSharedPrefs.forApp(getActivity());
-        return  prefs.getBoolean(GeckoPreferences.IS_MYOFFRZ_ONBOARDING_ENABLED,true);
-    }
-
-    // add getter and setter for on/off MyOffrz
-    // This part is derived from @{@link TabQueuePanel}.java
-    public void setMyOffrzEnabled(boolean value) {
-        final SharedPreferences prefs = GeckoSharedPrefs.forApp(getActivity());
-        final SharedPreferences.Editor editor = prefs.edit();
-        editor.putBoolean(GeckoPreferences.IS_MYOFFRZ_ENABLED, value).apply();
-    }
-
-    // This part is derived from @{@link TabQueueHelper}.java
-    public boolean isMyOffrzEnable(){
-        final SharedPreferences prefs = GeckoSharedPrefs.forApp(getActivity());
-        return  prefs.getBoolean(GeckoPreferences.IS_MYOFFRZ_ENABLED,isMyOffrzSupportedForLang());
-    }
-
-    private boolean isMyOffrzSupportedForLang(){
-        final LocaleManager localeManager = BrowserLocaleManager.getInstance();
-        final Locale locale = localeManager.getDefaultSystemLocale();
-        return Locale.GERMAN.getLanguage().equals(locale.getLanguage());
-    }
-    /* Cliqz end */
-
 }
