@@ -59,6 +59,7 @@ stage('JIRA'){
     }
 }
 def changes = getChangeString(passedBuilds)
+echo changes
 stage('Send email') {
     def projectName  = '$PROJECT_NAME'
     def changesSinceLastSuccess = changes
@@ -111,6 +112,7 @@ def getChangeString(passedBuilds) {
 
 @NonCPS
 def getIssueList(){
+    echo changes
     def list = []
     def re = /AB2-([0-9])*/
     def y = changes =~ re
