@@ -16,21 +16,6 @@ node ('master'){
     }
     id = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
     baseImageName ="browser-f/android:${dockerTag}"
-    codeImageName ="browser-f/android:code"
-    baseImage = stage('Build base image') {
-        docker.build(baseImageName, '--build-arg UID=`id -u` --build-arg GID=`id -g` -f Dockerfile .')
-    }
-    stage('Build code image') {
-        writeFile file: 'Dockerfile.code', text: """
-            FROM ${baseImageName}
-            COPY --chown=jenkins:jenkins . /app/
-        """
-
-        codeImage = docker.build(
-            codeImageName,
-            '-f Dockerfile.code .',
-        )
-    }
 }
 
 def build(Map m){
@@ -43,37 +28,6 @@ def build(Map m){
     return {
         node(nodeLabel){
             getImageName().inside() {
-                stage('Download cache') {
-                        withCredentials([
-                            [
-                                $class: 'UsernamePasswordMultiBinding',
-                                credentialsId: 'f1732e5f-3e84-47ad-9286-a5fa6657ec43',
-                                passwordVariable: 'AWS_SECRET_ACCESS_KEY',
-                                usernameVariable: 'AWS_ACCESS_KEY_ID',
-                            ]
-                        ]) {
-                            def s3Path = "s3://repository.cliqz.com/dist/android/cache"
-                            def cachePath = ".gradle/caches"
-                        }
-                    }
-                stage('Build APKS') {
-                    sh """#!/bin/bash -l
-                        set -e
-                        set -x
-                        pwd
-                        ls
-                        cd /app
-                    """
-                    withCredentials([
-                            file(credentialsId: 'd746a1dd-e075-4844-869a-32116a496352', variable: 'CERT_PATH' ),
-                            string(credentialsId: 'b7422020-fe1b-4c57-9230-f3d52afee3cf', variable: 'CERT_PASS')
-                    ]) {
-                        sh """#!/bin/bash -l
-                            set -e
-                            set -x
-                            cd /app/mozilla-release
-                        """
-                    }
                     apk = "asd.apk"
                 }
                 stage('Upload') {
