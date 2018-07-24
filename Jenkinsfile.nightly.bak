@@ -27,9 +27,6 @@ def build(Map m){
     def apk = ""
     return {
         node(nodeLabel){
-            getImageName().inside() {
-                apk = "asd.apk"
-            }
             stage('Upload') {
                 // Pass
             }
