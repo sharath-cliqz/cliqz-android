@@ -207,6 +207,12 @@ public abstract class BrowserToolbar extends ThemedRelativeLayout
         /* Cliqz start */
         ghostyButton = (Ghosty) findViewById(R.id.ghosty);
         ghostyButton.setOnGhostyClickedListener(this);
+        urlDisplayLayout.setOnPageActionClickedListener(new PageActionLayout.PageActionClickListener() {
+            @Override
+            public void onClick() {
+                activity.hideControlCenter();
+            }
+        });
         /* Cliqz end */
 
         menuButton = findViewById(R.id.menu);
@@ -358,8 +364,10 @@ public abstract class BrowserToolbar extends ThemedRelativeLayout
                 urlEditLayout.clearFocus();
 
                 toggleTabs();
-
-                hideOverlays(); // Cliqz
+                /* Cliqz Start */
+                hideOverlays();
+                activity.hideControlCenter();
+                /* Cliqz End */
             }
         });
         tabsButton.setImageLevel(0);
@@ -370,8 +378,9 @@ public abstract class BrowserToolbar extends ThemedRelativeLayout
                 // Drop the soft keyboard.
                 urlEditLayout.clearFocus();
                 activity.openOptionsMenu();
-
-                hideOverlays(); // Cliqz
+                /* Cliqz Start */
+                hideOverlays();
+                /* Cliqz End */
             }
         });
 

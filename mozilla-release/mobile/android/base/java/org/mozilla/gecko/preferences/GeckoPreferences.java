@@ -7,7 +7,6 @@ package org.mozilla.gecko.preferences;
 
 import android.Manifest;
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.Fragment;
@@ -136,6 +135,7 @@ public class GeckoPreferences
     // These match keys in resources/xml*/preferences*.xml
     private static final String PREFS_SEARCH_RESTORE_DEFAULTS = NON_PREF_PREFIX + "search.restore_defaults";
     private static final String PREFS_DATA_REPORTING_PREFERENCES = NON_PREF_PREFIX + "datareporting.preferences";
+    // TODO: What is this? Should we just use the Firefox preference and just disable Mozilla telemetry?
     private static final String PREFS_TELEMETRY_ENABLED = "toolkit.telemetry.enabled";
     public static final String CLIQZ_TELEMETRY_ENABLED = "cliqz.telemetry.enabled";
     private static final String PREFS_CRASHREPORTER_ENABLED = "datareporting.crashreporter.submitEnabled";
@@ -204,20 +204,19 @@ public class GeckoPreferences
     private static final int REQUEST_CODE_TAB_QUEUE = 8;
 
     /* Cliqz start */
+    // !!! NOTICE !!!
+    // Some of the following keys do not reflect Firefox naming conventions because they were
+    // already present in the legacy Lightning based Cliqz Browser for Android and we want to carry
+    // them over to this version.
     private static final String PREFS_DYNAMIC_TOOLBAR = "browser.chrome.dynamictoolbar";
-    // add human web link
+    // add human web keys
     private static final String PREFS_HUMAN_WEB_LINK = NON_PREF_PREFIX + "human.web.link";
+    public static final String PREFS_ENABLE_HUMAN_WEB = "pref.enable.human.web";
     // add IS_MYOFFRZ_ONBOARDING_ENABLED
     public static final String IS_MYOFFRZ_ONBOARDING_ENABLED = "myoffrz_onboarding_enabled";
-    // add Block Ads, Block Ads fair, what is fair and Block Ads data
-    public static final String PREFS_BLOCK_ADS = "pref.block.ads";
-    private static final String PREFS_BLOCK_ADS_FAIR = "pref.block.ads.fair";
-    Preference prefBlockAdsFair;
-    private static final String PREFS_BLOCK_ADS_WHAT_FAIR = NON_PREF_PREFIX + "block.ads.what.fair";
-    private static final String PREFS_BLOCK_ADS_DATA = NON_PREF_PREFIX + "block.ads.data";
     final private int DIALOG_CREATE_BLOCK_ADS_WHAT_FAIR = 2;
     // add rate cliqz browser to the settings menu
-    private static final String PREFS_rate_cliqz = NON_PREF_PREFIX + "rate.cliqz";
+    private static final String PREFS_RATE_US = NON_PREF_PREFIX + "rate.us";
     // add keys for General Home , Vendor screen , notifications screen, General language
     private static final String PREFS_GENERAL_HOME = NON_PREF_PREFIX + "general.home";
     private static final String PREFS_VENDOR_SCREEN = NON_PREF_PREFIX + "vendor.screen";
@@ -260,7 +259,7 @@ public class GeckoPreferences
     // add keys to about settings items
     private static final String PREFS_ABOUT_APP_VERSION_NAME = NON_PREF_PREFIX+ "about.app.version";
     private static final String PREFS_ABOUT_ARN = "pref.about.arn";
-    private static final String PREFS_ABOUT_EXTENSION_VERSION = NON_PREF_PREFIX+ "about.extension.version";
+    private static final String PREFS_ABOUT_SEARCH_VERSION = NON_PREF_PREFIX+ "about.extension.version";
     private static final String PREFS_ABOUT_PRIVACY_POLICY = NON_PREF_PREFIX+ "about.privacy.policy";
     private static final String PREFS_ABOUT_EULA = NON_PREF_PREFIX+ "about.eula";
     private static final String PREFS_ABOUT_ANDROID_OPEN_SOURCE_PROJECT = NON_PREF_PREFIX+ "about" +
@@ -274,6 +273,11 @@ public class GeckoPreferences
     public static final String PREFS_GHOSTERY_AUTO_UPDATE = "ghostery.settings.autoupdate";
     public static final String PREFS_GHOSTERY_ALLOW_FIRST_PARTY = "ghostery.settings.allowfirstparty";
     public static final String PREFS_GHOSTERY_BLOCK_NEW_TRACKERS = "ghostery.settings.blocknewtrackers";
+    // add key for enable quick search
+    public static final String PREF_SEARCH_ENABLE_BROWSER_QUICKSEARCH = "pref.search.enable.browser.quicksearch";
+    // Install and upgrade dates for Anolisys
+    public static final String PREFS_BROWSER_INSTALL_DATE = NON_PREF_PREFIX + "browser.install.date";
+    public static final String PREFS_BROWSER_UPGRADE_DATE = NON_PREF_PREFIX + "browser.upgrade.date";
     /* Cliqz end */
 
     private final Map<String, PrefHandler> HANDLERS;
@@ -975,23 +979,19 @@ public class GeckoPreferences
                     final String url = getResources().getString(R.string.pref_human_web_url);
                     ((LinkPreference) pref).setUrl(url);
                 }
-                // open dialog describe what block ads fair means
-                else if(PREFS_BLOCK_ADS_WHAT_FAIR.equals(key)) {
-                    pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
-                        @Override
-                        public boolean onPreferenceClick(Preference preference) {
-                            showDialog(DIALOG_CREATE_BLOCK_ADS_WHAT_FAIR);
-                            return true;
-                        }
-                    });
+                // set value of human web
+                else if (PREFS_ENABLE_HUMAN_WEB.equals(key)) {
+                    final PreferenceManager preferenceManager = new PreferenceManager
+                            (getApplicationContext());
+                    ((SwitchPreference)pref).setChecked(preferenceManager.isHumanWebEnabled());
                 }
                 // add navigate to playstore when click on rate cliqz browser
-                else if (PREFS_rate_cliqz.equals(key)){
+                else if (PREFS_RATE_US.equals(key)){
                     pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
                         @Override
                         public boolean onPreferenceClick(Preference preference) {
                             startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse
-                                    ("market://details?id=com.cliqz.browser")));
+                                    ("market://details?id="+getApplicationContext().getPackageName())));
                             return true;
                         }
                     });
@@ -1056,17 +1056,6 @@ public class GeckoPreferences
                         }
                     });
                 }
-                // set listener for value change if blockAds
-                else if (PREFS_BLOCK_ADS.equals(key)) {
-                    pref.setOnPreferenceChangeListener(this);
-                }
-                // Enable blockAdsFair if BlockAds Enabled
-                else if (PREFS_BLOCK_ADS_FAIR.equals(key)) {
-                    prefBlockAdsFair = pref;
-                    final PreferenceManager preferenceManager = new PreferenceManager
-                            (getApplicationContext());
-                    prefBlockAdsFair.setEnabled(preferenceManager.isBlockAdsEnabled());
-                }
                 // Open restore top sites dialog
                 else if(PREFS_RESTORE_TOP_SITES.equals(key)) {
                     pref.setOnPreferenceClickListener(new OnPreferenceClickListener() {
@@ -1082,8 +1071,8 @@ public class GeckoPreferences
                     pref.setSummary(BuildConfig.APP_VERSION_NAME);
                 }
                 // set extension version
-                else if (PREFS_ABOUT_EXTENSION_VERSION.equals(key)) {
-                    pref.setSummary(BuildConfig.EXTENSION_VERSION);
+                else if (PREFS_ABOUT_SEARCH_VERSION.equals(key)) {
+                    pref.setSummary(AppConstants.CLIQZ_SEARCH_VERSION);
                 }
                 // remove arn on production @TODO getARN from GCM Endpoint and set as a summary
                 else if (PREFS_ABOUT_ARN.equals(key) && !BuildConfig.DEBUG) {
@@ -1502,12 +1491,6 @@ public class GeckoPreferences
             // BrowserSearch is notified immediately about the new enabled state.
             EventDispatcher.getInstance().dispatch("SearchEngines:GetVisible", null);
         }
-        /* Cliqz start */
-        // enable blockAdsFair if blockAds checked
-        else if(PREFS_BLOCK_ADS.equals(prefName)) {
-            prefBlockAdsFair.setEnabled((Boolean) newValue);
-        }
-        /* Cliqz end */
 
         // Send Gecko-side pref changes to Gecko
         if (isGeckoPref(prefName)) {

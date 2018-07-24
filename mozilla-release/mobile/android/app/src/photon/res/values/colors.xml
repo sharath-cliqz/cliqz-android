@@ -278,13 +278,15 @@
     <color name="general_blue_color">#00aef0</color>
     <color name="general_dark_color">#424242</color>
     <color name="inactive_tab_color">#E2F0FC</color>
-    <color name="home_panesl_background_overlay">#40000000</color>
+    <color name="home_panel_background_overlay">#40000000</color>
+    <color name="history_list_divider_color">#97A4AE</color>
+    <color name="inactive_icon_color">#97A4AE</color>
 
     <!-- news -->
     <color name="news_bg_color_press">#cdcdcd</color>
-    <color name="news_bg_color">#CFFF</color>
-    <color name="news_url_text">#4d000000</color>
-    <color name="news_title_text">#000000</color>
+    <color name="news_bg_color">#40000000</color>
+    <color name="news_url_text">#FFFFFF</color>
+    <color name="news_title_text">#FFFFFF</color>
     <color name="news_local_span">@color/general_blue_color</color>
 
     <!-- URL Bar -->
@@ -292,7 +294,7 @@
 
     <!-- MyOffrz -->
     <color name="myoffrz_icon_tint">@color/general_blue_color</color>
-    <color name="myoffrz_bg_text">#9C9C9C</color>
+    <color name="myoffrz_bg_text">#FFFFFF</color>
     <color name="myoffrz_bg">#E7ECEE</color>
     <color name="myoffrz_onboarding_bg">#b8dfee</color>
     <color name="myoffrz_deactivated_layout">#40000000</color>
@@ -307,15 +309,24 @@
     <color name="cc_site_analytics">#87D7EF</color>
     <color name="cc_social_media">#388EE8</color>
     <color name="cc_default_category">#E8E8E8</color>
-    <color name="cc_advertising_disabled">#ABABAB</color>
-    <color name="cc_audio_video_player_disabled">#A0A0A0</color>
-    <color name="cc_comments_disabled">#BCBCBC</color>
-    <color name="cc_customer_interaction_disabled">#CDCDCD</color>
-    <color name="cc_essential_disabled">#888888</color>
-    <color name="cc_pornvertising_disabled">#7A7A7A</color>
-    <color name="cc_site_analytics_disabled">#9D9D9D</color>
-    <color name="cc_social_media_disabled">#A4A4A4</color>
-    <color name="cc_default_category_disabled">#E8E8E8</color>
+    <color name="cc_advertising_disabled">#97A4AE</color>
+    <color name="cc_audio_video_player_disabled">#A1ADB6</color>
+    <color name="cc_comments_disabled">#ACB6BE</color>
+    <color name="cc_customer_interaction_disabled">#B6BFC6</color>
+    <color name="cc_essential_disabled">#C1C8CE</color>
+    <color name="cc_pornvertising_disabled">#CBD1D6</color>
+    <color name="cc_site_analytics_disabled">#D5DBDF</color>
+    <color name="cc_social_media_disabled">#DFE3E6</color>
+    <color name="cc_default_category_disabled">#EAEDEF</color>
+    <color name="cc_advertising_blocked">#E74055</color>
+    <color name="cc_audio_video_player_blocked">#E95366</color>
+    <color name="cc_comments_blocked">#EC6677</color>
+    <color name="cc_customer_interaction_blocked">#EE7988</color>
+    <color name="cc_essential_blocked">#F18C99</color>
+    <color name="cc_pornvertising_blocked">#F39FAA</color>
+    <color name="cc_site_analytics_blocked">#F5B3BB</color>
+    <color name="cc_social_media_blocked">#F7C5CC</color>
+    <color name="cc_default_category_blocked">#FAD9DD</color>
     <color name="cc_text_color">#4A4A4A</color>
     <color name="cc_restricted">#BE4948</color>
     <color name="cc_transparency">#FAFFFFFF</color>
@@ -326,7 +337,7 @@
     <color name="history_favorites_row_private_shadow">@android:color/darker_gray</color>
 
     <!-- Browser toolbar icons -->
-    <color name="cliqz_icon">@android:color/white</color>
+    <color name="cliqz_icon">@android:color/black</color>
     <color name="cliqz_icon_disabled">#33FFFFFF</color>
     <!-- Cliqz end -->
 

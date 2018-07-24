@@ -5,7 +5,6 @@
 
 package org.mozilla.gecko.tabs;
 
-import org.mozilla.gecko.Experiments;
 import org.mozilla.gecko.GeckoApp;
 import org.mozilla.gecko.GeckoApplication;
 import org.mozilla.gecko.GeckoSharedPrefs;
@@ -16,10 +15,10 @@ import org.mozilla.gecko.animation.PropertyAnimator;
 import org.mozilla.gecko.animation.ViewHelper;
 import org.mozilla.gecko.lwt.LightweightTheme;
 import org.mozilla.gecko.lwt.LightweightThemeDrawable;
-import org.mozilla.gecko.mma.MmaDelegate;
 import org.mozilla.gecko.preferences.GeckoPreferences;
 import org.mozilla.gecko.restrictions.Restrictable;
 import org.mozilla.gecko.restrictions.Restrictions;
+import org.mozilla.gecko.toolbar.TabCounter;
 import org.mozilla.gecko.util.HardwareUtils;
 import org.mozilla.gecko.widget.GeckoPopupMenu;
 import org.mozilla.gecko.widget.IconTabWidget;
@@ -28,7 +27,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
 import android.support.v4.content.ContextCompat;
@@ -44,11 +42,8 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 
-import org.mozilla.gecko.switchboard.SwitchBoard;
-
-import org.mozilla.gecko.widget.themed.ThemedImageButton;
+import org.mozilla.gecko.widget.themed.ThemedTextView;
 
 public class TabsPanel extends LinearLayout
                        implements GeckoPopupMenu.OnMenuItemClickListener,
@@ -67,6 +62,10 @@ public class TabsPanel extends LinearLayout
         void show();
         void hide();
         boolean shouldExpand();
+        /* Cliqz start */
+        // get tabs count for tab_counter text
+        int getTabsCount();
+        /* Cliqz end */
     }
 
     public interface CloseAllPanelView extends PanelView {
@@ -102,7 +101,10 @@ public class TabsPanel extends LinearLayout
     private final Context mContext;
     private final GeckoApp mActivity;
     private final LightweightTheme mTheme;
-    private RelativeLayout mHeader;
+    /* Cliqz start */
+    // change Relative Layout to Linear
+    private LinearLayout mHeader;
+
     private FrameLayout mTabsContainer;
     private PanelView mPanel;
     private PanelView mPanelNormal;
@@ -112,11 +114,14 @@ public class TabsPanel extends LinearLayout
     private IconTabWidget mTabWidget;
     private View mMenuButton;
     private ImageButton mAddTab;
+    // Cliqz: add tabsCounter
+    private TabCounter mTabsCounter;
 
     // Tab Tray
-    @Nullable private ThemedImageButton mNormalTabsPanel;
-    @Nullable private ThemedImageButton mPrivateTabsPanel;
-
+    // Cliqz: change the panel type to Text instead of button
+    @Nullable private ThemedTextView mNormalTabsPanel;
+    @Nullable private ThemedTextView mPrivateTabsPanel;
+    /* Cliqz end */
 
     private Panel mCurrentPanel;
     private boolean mVisible;
@@ -145,7 +150,9 @@ public class TabsPanel extends LinearLayout
     }
 
     private void initialize() {
-        mHeader = (RelativeLayout) findViewById(R.id.tabs_panel_header);
+        /* Cliqz start */
+        // change Relative Layout to Linear
+        mHeader = (LinearLayout) findViewById(R.id.tabs_panel_header);
         mTabsContainer = (FrameLayout) findViewById(R.id.tabs_container);
 
         mPanelNormal = (PanelView) findViewById(R.id.normal_tabs);
@@ -164,11 +171,16 @@ public class TabsPanel extends LinearLayout
 
         mTabWidget = (IconTabWidget) findViewById(R.id.tab_widget);
 
-        final View tabNormal = mTabWidget.addTab(R.drawable.tabs_normal, R.string.tabs_normal);
-        mNormalTabsPanel = tabNormal instanceof ThemedImageButton ? ((ThemedImageButton) tabNormal) : null;
+        // Cliqz: change the panel type to Text instead of button and pass Id to the view
+        final View tabNormal = mTabWidget.addTab(R.drawable.tabs_normal, R.string.tabs_normal,R
+                .id.tabs_normal);
+        mNormalTabsPanel = tabNormal instanceof ThemedTextView ? ((ThemedTextView) tabNormal) : null;
 
-        final View tabPrivate = mTabWidget.addTab(R.drawable.tabs_private, R.string.tabs_private);
-        mPrivateTabsPanel = tabPrivate instanceof ThemedImageButton ? ((ThemedImageButton) tabPrivate) : null;
+        // Cliqz: change the panel type to Text instead of button and pass Id to the view
+        final View tabPrivate = mTabWidget.addTab(R.drawable.tabs_private, R.string.tabs_private,
+                R.id.tabs_private);
+        mPrivateTabsPanel = tabPrivate instanceof ThemedTextView ? ((ThemedTextView) tabPrivate) : null;
+
         if (mPrivateTabsPanel != null) {
             mPrivateTabsPanel.setPrivateMode(true);
         }
@@ -186,14 +198,24 @@ public class TabsPanel extends LinearLayout
                 showMenu();
             }
         });
-
+        /* Cliqz: remove back button
         final ImageButton navBackButton = (ImageButton) findViewById(R.id.nav_back);
         navBackButton.setOnClickListener(new Button.OnClickListener() {
+                                             @Override
+                                             public void onClick(View view) {
+                                                 mActivity.onBackPressed();
+                                             }
+                                         });*/
+        // Cliqz: add TabsCounter and listener on it
+        mTabsCounter = (TabCounter) findViewById(R.id.tabs_counter);
+        final ImageButton tabsButton = (ImageButton) findViewById(R.id.tabs);
+        tabsButton.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
                 mActivity.onBackPressed();
             }
         });
+        /* Cliqz end*/
     }
 
     public void showMenu() {
@@ -385,28 +407,38 @@ public class TabsPanel extends LinearLayout
         switch (panelToShow) {
             case NORMAL_TABS:
                 mPanel = mPanelNormal;
+                /* Cliqz start o/
+                // remove applied color
                 if (mNormalTabsPanel != null) {
                     mNormalTabsPanel.setColorFilter(ContextCompat.getColor(getContext(), R.color.tab_item_normal_highlight_bg));
                 }
                 if (mPrivateTabsPanel != null) {
                     mPrivateTabsPanel.setColorFilter(Color.WHITE);
                 }
+                /o Cliqz end*/
                 break;
             case PRIVATE_TABS:
                 mPanel = mPanelPrivate;
+                /* Cliqz start o/
+                // remove applied color
                 if (mNormalTabsPanel != null) {
                     mNormalTabsPanel.setColorFilter(Color.WHITE);
                 }
                 if (mPrivateTabsPanel != null) {
                     mPrivateTabsPanel.setColorFilter(ContextCompat.getColor(getContext(), R.color.tab_item_private_highlight_bg));
                 }
+                /o Cliqz end*/
                 break;
 
             default:
                 throw new IllegalArgumentException("Unknown panel type " + panelToShow);
         }
         mPanel.show();
-
+        /* Cliqz start */
+        // set tabsCounter text "IMPORTANT: do it after mPanel.show(), because it calls
+        // refreshTabsData(); to refresh the tabs displayed. "
+        mTabsCounter.setCount(mPanel.getTabsCount());
+        /* Cliqz end */
         mAddTab.setVisibility(View.VISIBLE);
 
         mMenuButton.setEnabled(true);
@@ -511,4 +543,10 @@ public class TabsPanel extends LinearLayout
 
         refresh();
     }
+
+    /* Cliqz start */
+    public TabCounter getTabsCounter(){
+        return mTabsCounter;
+    }
+    /* Cliqz end */
 }

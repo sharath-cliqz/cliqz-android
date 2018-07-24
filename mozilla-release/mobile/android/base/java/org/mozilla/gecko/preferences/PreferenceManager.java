@@ -58,11 +58,6 @@ public class PreferenceManager {
         return mAppSharedPreferences.getBoolean(GeckoPreferences.PREFS_SHOW_MYOFFRZ, isMyOffrzSupportedForLang());
     }
 
-    public boolean isBlockAdsEnabled() {
-        return  mAppSharedPreferences.getBoolean(GeckoPreferences
-                .PREFS_BLOCK_ADS,true);
-    }
-
     public boolean isGhosteryAutoUpdateEnabled() {
         return mAppSharedPreferences.getBoolean(GeckoPreferences.PREFS_GHOSTERY_AUTO_UPDATE, true);
     }
@@ -73,5 +68,18 @@ public class PreferenceManager {
 
     public boolean areNewTrackersBlocked() {
         return  mAppSharedPreferences.getBoolean(GeckoPreferences.PREFS_GHOSTERY_BLOCK_NEW_TRACKERS, false);
+    }
+
+    public boolean isQuickSearchEnabled(){
+        return mAppSharedPreferences.getBoolean(GeckoPreferences.PREF_SEARCH_ENABLE_BROWSER_QUICKSEARCH,true);
+    }
+
+    public boolean isHumanWebEnabled(){
+        return mAppSharedPreferences.getBoolean(GeckoPreferences.PREFS_ENABLE_HUMAN_WEB,true);
+    }
+
+    public void setHumanWebEnabled(boolean value){
+        final SharedPreferences.Editor editor = mAppSharedPreferences.edit();
+        editor.putBoolean(GeckoPreferences.PREFS_ENABLE_HUMAN_WEB, value).apply();
     }
 }
