@@ -28,14 +28,13 @@ def build(Map m){
     return {
         node(nodeLabel){
             getImageName().inside() {
-                    apk = "asd.apk"
-                }
-                stage('Upload') {
-                    // Pass
-                }
-                stage('Clean Up') {
-                    // Pass
-                }
+                apk = "asd.apk"
+            }
+            stage('Upload') {
+                // Pass
+            }
+            stage('Clean Up') {
+                // Pass
             }
         }
     }
