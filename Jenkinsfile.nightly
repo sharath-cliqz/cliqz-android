@@ -222,9 +222,9 @@ stage('JIRA'){
         ]
         for (element in issueIds){
             try{
-                def issue = jiraGetIssue idOrKey: element
+                def issue = jiraGetIssue failOnError: false, idOrKey: element
                 if(issue.data.fields.status.name == "Resolved"){
-                    jiraTransitionIssue idOrKey: element, input: transitionInput
+                    jiraTransitionIssue failOnError: false, idOrKey: element, input: transitionInput
                     echo "Transistioned ${element}"
                 } else{
                     echo """Element with id ${element} was not transitioned\nIts status is: """+issue.data.fields.status.name
