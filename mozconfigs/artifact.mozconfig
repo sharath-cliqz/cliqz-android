@@ -7,10 +7,10 @@ ac_add_options --with-android-sdk=$ANDROID_HOME
 ac_add_options --with-android-ndk=$ANDROID_NDK_HOME
 
 # Write build artifacts to:
-mk_add_options MOZ_OBJDIR=./objdir-frontend-android/
+mk_add_options MOZ_OBJDIR=./objdir-frontend-android/ghostery
 
 # Branding
-ac_add_options --with-branding=mobile/android/branding/cliqz
+ac_add_options --with-branding=mobile/android/branding/ghostery
 
 # MOZ Settings
 export MOZ_AUTOMATION_BUILD_SYMBOLS=1
