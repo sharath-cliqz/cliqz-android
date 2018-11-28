@@ -173,6 +173,9 @@ def build(Map m){
                                 for AB_CD in $MOZ_CHROME_MULTILOCALE; do
                                     ./mach build chrome-$AB_CD
                                 done
+                                cat /app/mozilla-release/objdir-frontend-android/ghostery/dist/bin/defaults/pref/mobile-l10n.js
+                                rm -f /app/mozilla-release/objdir-frontend-android/ghostery/dist/bin/defaults/pref/mobile-l10n.js
+                                cp /app/mozilla-release/mobile/android/installer/mobile-l10n.js /app/mozilla-release/objdir-frontend-android/ghostery/dist/bin/defaults/pref/mobile-l10n.js
                                 export AB_CD=multi
                                 ./mach package
                             '''

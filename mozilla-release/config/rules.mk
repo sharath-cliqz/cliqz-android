@@ -1288,27 +1288,27 @@ endif
 # Cliqz additional system addons
 FEATURES_PATH = $(DIST)/bin/features
 $(FEATURES_PATH):
-	mkdir -p $(FEATURES_PATH)
+       mkdir -p $(FEATURES_PATH)
 
 CLIQZ_XPI_PATH = $(FEATURES_PATH)/android@cliqz.com.xpi
 $(CLIQZ_XPI_PATH): $(FEATURES_PATH)
-	wget -O $(CLIQZ_XPI_PATH) $(CLIQZ_SEARCH_LINK)
+       wget -O $(CLIQZ_XPI_PATH) $(CLIQZ_SEARCH_LINK)
 
 GHOSTERY_XPI_PATH = $(FEATURES_PATH)/firefox@ghostery.com.xpi
 $(GHOSTERY_XPI_PATH): $(FEATURES_PATH)
-	wget -O $(GHOSTERY_XPI_PATH) $(CLIQZ_PRIVACY_LINK)
+       wget -O $(GHOSTERY_XPI_PATH) $(CLIQZ_PRIVACY_LINK)
 
 # Package Cliqz stuff
 cliqz_sys_addons: $(CLIQZ_XPI_PATH) $(GHOSTERY_XPI_PATH)
-	echo cliqz_sys_addons in `pwd`
+       echo cliqz_sys_addons in `pwd`
 
 # Remake 'built_in_addons.json'
 remake_built_in_addons:
-	$(PYTHON) -c \
-	'import os, json; \
-	listing = json.load(open("$(topobjdir)/toolkit/mozapps/extensions/built_in_addons.json", "r")); \
-	listing["system"] = [it.replace(".xpi", "") for it in sorted(os.listdir("$(FEATURES_PATH)"))]; \
-	json.dump(listing, open("$(topobjdir)/toolkit/mozapps/extensions/built_in_addons.json", "w"))'
+       $(PYTHON) -c \
+       'import os, json; \
+       listing = json.load(open("$(topobjdir)/toolkit/mozapps/extensions/built_in_addons.json", "r")); \
+       listing["system"] = [it.replace(".xpi", "") for it in sorted(os.listdir("$(FEATURES_PATH)"))]; \
+       json.dump(listing, open("$(topobjdir)/toolkit/mozapps/extensions/built_in_addons.json", "w"))'
 
 # Cliqz end
 
