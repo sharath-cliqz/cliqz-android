@@ -1,0 +1,70 @@
+#!/bin/env groovy
+
+node('master') {
+    
+    def dockerTag = ""
+    
+    stage('Checkout') {
+        checkout scm
+        dockerTag = readFile('mozilla-release/browser/config/version_display.txt').trim()
+        dir('scripts'){
+            git branch:'automation',
+            credentialsId: 'cliqz-oss-ci',
+            url: 'https://github.com/ghostery/browser-android.git'
+        }
+    }
+    def baseImageName = "browser-f/android:${dockerTag}"
+    baseImage = stage('Build base image') {
+        docker.build(baseImageName, '--build-arg UID=`id -u` --build-arg GID=`id -g` -f Dockerfile .')
+    }
+    baseImage.inside() {
+        try {
+            stage('Build and Signs APKS') {
+                withCredentials([
+                            file(credentialsId: 'd746a1dd-e075-4844-869a-32116a496352', variable: 'CERT_PATH' ),
+                            string(credentialsId: 'b7422020-fe1b-4c57-9230-f3d52afee3cf', variable: 'CERT_PASS')
+                    ]) {
+                    sh '''bash scripts/build-system/magic.sh \
+                        --arch=x86 \
+                        --brand=ghostery \
+                        --channel=MA50 \
+                        --locale=multi \
+                        --type=release
+                    '''
+                    sh '''bash scripts/build-system/magic.sh \
+                        --arch=arm \
+                        --brand=ghostery \
+                        --channel=MA50 \
+                        --locale=multi \
+                        --type=release
+                    '''
+                }
+                sh 'cp -r build/*.apk mozilla-release/mobile/android/ && ls mozilla-release/mobile/android/'
+            }
+            /*stage('Upload') {
+                withCredentials([
+                    file(credentialsId: 'd746a1dd-e075-4844-869a-32116a496352', variable: 'CERT_PATH'),
+                    string(credentialsId: 'b7422020-fe1b-4c57-9230-f3d52afee3cf', variable: 'CERT_PASS'),
+                    file(credentialsId: '81d5a4c2-c504-4d18-a29f-18421bb04ddc', variable: 'PLAY_STORE_CERT')]) {
+                    sh '''#!/bin/bash -l
+                        set -e
+                        set -x
+                        cd mozilla-release/mobile/android
+                        mv fastlane/Appfile.ghostery fastlane/Appfile
+                        fastlane alpha
+                    '''
+                }
+            }*/
+        }
+        finally {
+            stage('Clean Up') {
+                sh '''#!/bin/bash -l
+                    rm -f mozilla-release/mozconfig
+                    rm -rf mozilla-release/objdir-frontend-android
+                    rm -rf build
+                    rm -f mozilla-release/mobile/android/*.apk
+                '''
+            }
+        }
+    }
+}
